@@ -1,9 +1,18 @@
-from flask import Flask
-from neo4j import GraphDatabase  # noqa: F401
+from functools import lru_cache
+
+from neo4j import GraphDatabase
+
+from sixdegrees.config import settings
 
 
-class Neo4jDatabase:
-    def __init__(self):
-        self.driver = None
+@lru_cache
+def get_driver():
+    return GraphDatabase.driver(
+        settings.neo4j_uri,
+        auth=settings.neo4j_auth,
+    )
 
-    def init_app(self, app: Flask): ...
+
+def get_session():
+    driver = get_driver()
+    return driver.session()
