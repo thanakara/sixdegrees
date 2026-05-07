@@ -11,3 +11,13 @@ args = [{ name = "path", default = ".", positional = true, multiple = true }]
 help = "Check formatting with diff (pass directory/file as arg)"
 cmd = "ruff format ${path} --check --diff"
 args = [{ name = "path", default = ".", positional = true, multiple = true }]
+
+[tasks.compose_up]
+help = "Start Neo4j and run migrations"
+cwd = "docker"
+cmd = "docker compose --env-file=../.env up -d --build"
+
+[tasks.compose_down]
+help = "Stop and remove volumes"
+cwd = "docker"
+cmd = "docker compose --env-file=../.env down -v"

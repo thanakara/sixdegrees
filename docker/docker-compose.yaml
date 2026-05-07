@@ -1,0 +1,32 @@
+services:
+
+  neo4j:
+    image: neo4j:5
+    container_name: neo4j-db
+    ports:
+      - "7474:7474" # browser ui
+      - "7687:7687" # bolt proto
+    environment:
+      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD}"
+    volumes:
+      - neo4j_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:7474" ]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    command: >
+      --address bolt://neo4j:7687 --username neo4j --password ${NEO4J_PASSWORD}
+      --location file:///migrations migrate
+    depends_on:
+      neo4j:
+        condition: service_healthy
+
+volumes:
+  neo4j_data:

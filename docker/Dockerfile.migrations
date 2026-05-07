@@ -1,0 +1,15 @@
+# https://github.com/michael-simons/neo4j-migrations/releases
+FROM debian:bookworm-slim
+
+ARG VERSION=2.19.2
+
+RUN apt-get update && apt-get install -y curl unzip && \
+    curl -LO https://github.com/michael-simons/neo4j-migrations/releases/download/${VERSION}/neo4j-migrations-${VERSION}-linux-x86_64.zip && \
+    unzip neo4j-migrations-${VERSION}-linux-x86_64.zip && \
+    mv neo4j-migrations-${VERSION}-linux-x86_64/bin/neo4j-migrations /usr/local/bin/ && \
+    rm -rf neo4j-migrations-* && \
+    apt-get remove -y curl unzip && apt-get autoclean
+
+COPY migrations/ /migrations/
+
+ENTRYPOINT ["neo4j-migrations"]
