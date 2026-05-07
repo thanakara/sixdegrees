@@ -1,0 +1,1 @@
+![](assets/flask_movie_graph_architecture.svg)

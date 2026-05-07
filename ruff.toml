@@ -1,0 +1,16 @@
+line-length = 120
+target-version = "py312"
+exclude = [".git", ".vscode"]
+
+[lint]
+select = ["I", "B", "C", "E", "F", "W", "B9", "UP", "PL"]
+ignore = ["W191", "E731", "B905", "PLR0913", "PLC0414"]
+
+[lint.isort]
+from-first = false
+length-sort = true
+lines-between-types = 1
+
+[format]
+quote-style = "double"
+indent-style = "space"

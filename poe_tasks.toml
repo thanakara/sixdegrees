@@ -1,0 +1,13 @@
+[tasks.clean]
+help = "Remove all cache and generated files"
+script = "poethepoet.scripts:rm('./**/__pycache__', './**/*.pyc', './**/*.pyo')"
+
+[tasks.lint]
+help = "Run ruff linter with diff (pass directory/file as arg)"
+cmd = "ruff check ${path} --diff"
+args = [{ name = "path", default = ".", positional = true, multiple = true }]
+
+[tasks.format]
+help = "Check formatting with diff (pass directory/file as arg)"
+cmd = "ruff format ${path} --check --diff"
+args = [{ name = "path", default = ".", positional = true, multiple = true }]
