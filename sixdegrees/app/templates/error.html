@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ code }} — {{ name }}</h1>
+<p>{{ description }}</p>
+<a href="{{ url_for('main.index') }}">Go home</a>
+{% endblock %}
