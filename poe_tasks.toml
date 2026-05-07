@@ -21,3 +21,8 @@ cmd = "docker compose --env-file=../.env up -d --build"
 help = "Stop and remove volumes"
 cwd = "docker"
 cmd = "docker compose --env-file=../.env down -v"
+
+[tasks.seed]
+help = "Seed the Neo4j Database"
+cmd = "python sixdegrees/ingest/seeder.py"
+executor = { type = "uv" }

@@ -1,106 +1,65 @@
-import pandas as pd
-
-from neo4j import Session
-
 from sixdegrees import log
-from sixdegrees.ingest import PROCESSED_PATH
+from sixdegrees.ingest import (
+    GENRES_CYPHER,
+    MOVIES_CYPHER,
+    PEOPLE_CYPHER,
+    ACTED_IN_CYPHER,
+    DIRECTED_CYPHER,
+    HAS_GENRE_CYPHER,
+)
 from sixdegrees.app.extensions import get_session
+from sixdegrees.ingest.helpers import load, read
 
 
-def load_movies(session: Session, df: pd.DataFrame):
-    query = """
-    UNWIND $rows AS row
-    MERGE (m:Movie {movie_id: row.movie_id})
-    SET m.title = row.title,
-        m.year = row.year,
-        m.runtime = row.runtime,
-        m.averageRating = row.averageRating,
-        m.numVotes = row.numVotes
+def load_movies() -> None:
+    load("nodes.Movie", MOVIES_CYPHER, read("nodes.Movie.csv"))
+
+
+def load_people() -> None:
+    load("nodes.Person", PEOPLE_CYPHER, read("nodes.Person.csv"))
+
+
+def load_genres() -> None:
+    load("nodes.Genre", GENRES_CYPHER, read("nodes.Genre.csv"))
+
+
+def load_acted_in() -> None:
+    load("edges.ACTED_IN", ACTED_IN_CYPHER, read("edges.ACTED_IN.csv"))
+
+
+def load_directed() -> None:
+    load("edges.DIRECTED", DIRECTED_CYPHER, read("edges.DIRECTED.csv"))
+
+
+def load_has_genre() -> None:
+    load("edges.HAS_GENRE", HAS_GENRE_CYPHER, read("edges.HAS_GENRE.csv"))
+
+
+def verify() -> None:
+    cypher = """
+    MATCH (n)
+    RETURN labels(n)[0] AS label, count(*) AS total
+    UNION ALL
+    MATCH ()-[r]->()
+    RETURN type(r) AS label, count(*) AS total
+    ORDER BY total DESC
     """
-    session.run(query, rows=df.to_dict("records"))
-
-
-def load_people(session: Session, df: pd.DataFrame):
-    query = """
-    UNWIND $rows AS row
-    MERGE (p:Person {person_id: row.person_id})
-    SET p.name = row.name,
-        p.birthYear = row.birthYear,
-        p.primaryProfession = row.primaryProfession
-    """
-    session.run(query, rows=df.to_dict("records"))
-
-
-def load_genres(session: Session, df: pd.DataFrame):
-    query = """
-    UNWIND $rows AS row
-    MERGE (g:Genre {genre: row.genre})
-    """
-    session.run(query, rows=df.to_dict("records"))
-
-
-def load_acted_in(session: Session, df: pd.DataFrame):
-    query = """
-    UNWIND $rows AS row
-    MATCH (p:Person {person_id: row.source})
-    MATCH (m:Movie {movie_id: row.target})
-    MERGE (p)-[r:ACTED_IN]->(m)
-    SET r.characters = row.characters
-    """
-    session.run(query, rows=df.to_dict("records"))
-
-
-def load_directed(session: Session, df: pd.DataFrame):
-    query = """
-    UNWIND $rows AS row
-    MATCH (p:Person {person_id: row.source})
-    MATCH (m:Movie {movie_id: row.target})
-    MERGE (p)-[:DIRECTED]->(m)
-    """
-    session.run(query, rows=df.to_dict("records"))
-
-
-def load_has_genre(session: Session, df: pd.DataFrame):
-    query = """
-    UNWIND $rows AS row
-    MATCH (m:Movie {movie_id: row.source})
-    MATCH (g:Genre {genre: row.target})
-    MERGE (m)-[:HAS_GENRE]->(g)
-    """
-    session.run(query, rows=df.to_dict("records"))
-
-
-def main():
-    movies = pd.read_csv(PROCESSED_PATH / "nodes.Movie.csv")
-    people = pd.read_csv(PROCESSED_PATH / "nodes.Person.csv")
-    genres = pd.read_csv(PROCESSED_PATH / "nodes.Genre.csv")
-
-    acted_in = pd.read_csv(PROCESSED_PATH / "edges.ACTED_IN.csv")
-    directed = pd.read_csv(PROCESSED_PATH / "edges.DIRECTED.csv")
-    has_genre = pd.read_csv(PROCESSED_PATH / "edges.HAS_GENRE.csv")
-
-    movies = movies.where(pd.notnull(movies), None)
-    people = people.where(pd.notnull(people), None)
-    genres = genres.where(pd.notnull(genres), None)
-
+    log.info("Verification:")
     with get_session() as session:
-        log.info("LOAD CSV: nodes.Movie")
-        load_movies(session, movies)
+        for row in session.run(cypher):
+            log.info(f"  {row['label']:<20} {row['total']:>10,}")
 
-        log.info("LOAD CSV: nodes.Person")
-        load_people(session, people)
 
-        log.info("LOAD CSV: nodes.Genre")
-        load_genres(session, genres)
+def main() -> None:
+    load_movies()
+    load_people()
+    load_genres()
 
-        log.info("LOAD CSV: edges.ACTED_IN")
-        load_acted_in(session, acted_in)
+    load_acted_in()
+    load_directed()
+    load_has_genre()
 
-        log.info("LOAD CSV: edges.DIRECTED")
-        load_directed(session, directed)
-
-        log.info("LOAD CSV: edges.HAS_GENRE")
-        load_has_genre(session, has_genre)
+    verify()
 
 
 if __name__ == "__main__":
