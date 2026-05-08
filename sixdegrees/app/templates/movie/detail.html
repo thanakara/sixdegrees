@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}{{ movie.title }}{% endblock %}
+{% block meta_description %}{{ movie.title }} ({{ movie.year }}) — rated {{ "%.1f"|format(movie.rating) }} with {{
+"{:,}".format(movie.numVotes) }} votes.{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+    <div class="detail-header">
+        <p class="detail-header__label">Movie</p>
+        <h1 class="detail-header__title">{{ movie.title }}</h1>
+        <div class="detail-header__meta">
+            {% if movie.year %}
+            <span class="meta-pill">{{ movie.year }}</span>
+            {% endif %}
+            {% if movie.runtime %}
+            <span class="meta-pill">{{ movie.runtime }} min</span>
+            {% endif %}
+            {% if movie.rating %}
+            <span class="meta-pill meta-pill--gold">★ {{ "%.1f"|format(movie.rating) }}</span>
+            {% endif %}
+            {% if movie.numVotes %}
+            <span class="meta-pill">{{ "{:,}".format(movie.numVotes) }} votes</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if movie.genres %}
+    <div class="genre-list">
+        {% for genre in movie.genres | sort %}
+        <span class="genre-tag">{{ genre }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% set directors = movie.directors | selectattr('id') | list %}
+    {% if directors %}
+    <h2 class="section-title">Directed by</h2>
+    <div class="card-grid">
+        {% for person in directors | sort(attribute='name') %}
+        <a href="{{ url_for('person.detail', person_id=person.id) }}" class="card">
+            <div class="card__title">{{ person.name }}</div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% set cast = movie.cast | selectattr('id') | list %}
+    {% if cast %}
+    <h2 class="section-title">Cast</h2>
+    <div class="card-grid">
+        {% for person in cast | sort(attribute='name') %}
+        <a href="{{ url_for('person.detail', person_id=person.id) }}" class="card">
+            <div class="card__title">{{ person.name }}</div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('main.index') }}" class="btn btn--outline">← Back to search</a>
+
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="{% block meta_description %}Explore the hidden connections between every actor in cinema.{% endblock %}" />
+
+    <title>{% block title %}SIXDEGREES{% endblock %} — Six Degrees of Cinema</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
+    <header class="site-header">
+        <div class="site-header__inner">
+            <a href="{{ url_for('main.index') }}" class="site-logo">
+                SIX<span>DEGREES</span>
+            </a>
+            <nav class="site-nav">
+                <a href="{{ url_for('main.index') }}">Search</a>
+                <a href="https://github.com/yourusername/sixdegrees" target="_blank" rel="noopener">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ── Main ───────────────────────────────────────────────────────────── -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ── Footer ─────────────────────────────────────────────────────────── -->
+    <footer class="site-footer">
+        <p>
+            SIXDEGREES &mdash;
+            Built with Neo4j, Flask &amp; IMDB data &mdash;
+            <a href="https://github.com/yourusername/sixdegrees" target="_blank" rel="noopener">Source</a>
+        </p>
+    </footer>
+
+    <!-- ── Scripts ────────────────────────────────────────────────────────── -->
+    {% block extra_js %}{% endblock %}
+
+</body>
+
+</html>

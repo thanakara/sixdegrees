@@ -25,7 +25,7 @@ def get_movie(movie_id: str) -> dict | None:
     """
 
     with get_session() as session:
-        record = session.run(cypher, movie_id=movie_id).single()
+        record = session.run(cypher, parameters={"movie_id": movie_id}).single()
 
     if record is None:
         return None

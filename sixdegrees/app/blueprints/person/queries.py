@@ -31,7 +31,7 @@ def get_person(person_id: str) -> dict | None:
     """
 
     with get_session() as session:
-        record = session.run(cypher, person_id=person_id).single()
+        record = session.run(cypher, parameters={"person_id": person_id}).single()
 
     if record is None:
         return None

@@ -32,12 +32,18 @@ def shortest_path(name_a: str, name_b: str) -> dict | None:
     """
 
     with get_session() as session:
-        record = session.run(cypher, name_a=name_a, name_b=name_b).single()
+        record = session.run(
+            cypher,
+            parameters={
+                "name_a": name_a,
+                "name_b": name_b,
+            },
+        ).single()
 
     if record is None:
         return None
 
-    chain = record["chain"]
+    chain = [dict(node) for node in record["chain"]]
     return {
         "chain": chain,
         "degrees": len([n for n in chain if n["type"] == "movie"]),
@@ -61,5 +67,11 @@ def search_people(query: str, limit: int = 10) -> list[dict]:
     """
 
     with get_session() as session:
-        result = session.run(cypher, query=query, limit=limit)
+        result = session.run(
+            cypher,
+            parameters={
+                "query": query,
+                "limit": limit,
+            },
+        )
         return [dict(r) for r in result]

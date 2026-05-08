@@ -26,3 +26,9 @@ cmd = "docker compose --env-file=../.env down -v"
 help = "Seed the Neo4j Database"
 cmd = "python sixdegrees/ingest/seeder.py"
 executor = { type = "uv" }
+
+[tasks.wsgi]
+help = "Start the Flask application"
+envfile = ".env"
+cmd = "python ${FLASK_APP}"
+executor = { type = "uv" }

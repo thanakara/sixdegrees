@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}SIXDEGREES{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+    <!-- ── Hero ─────────────────────────────────────────────────────────── -->
+    <section class="hero">
+
+        <p class="hero__eyebrow">The Kevin Bacon Problem</p>
+
+        <h1 class="hero__title">
+            SIX<br /><em>DEGREES</em>
+        </h1>
+
+        <p class="hero__subtitle">
+            Every actor in cinema is connected through shared films.
+            Find the shortest path between any two people.
+        </p>
+
+        <!-- ── Search form ──────────────────────────────────────────────── -->
+        <form class="search-form" action="{{ url_for('main.path') }}" method="get">
+
+            <div class="search-form__row">
+
+                <div class="search-field">
+                    <label for="input-a">First person</label>
+                    <input id="input-a" type="text" name="a" placeholder="e.g. Kevin Bacon" autocomplete="off"
+                        value="{{ request.args.get('a', '') }}" required />
+                    <ul class="autocomplete-list" id="autocomplete-a" role="listbox"></ul>
+                </div>
+
+                <div class="search-form__sep">TO</div>
+
+                <div class="search-field">
+                    <label for="input-b">Second person</label>
+                    <input id="input-b" type="text" name="b" placeholder="e.g. Meryl Streep" autocomplete="off"
+                        value="{{ request.args.get('b', '') }}" required />
+                    <ul class="autocomplete-list" id="autocomplete-b" role="listbox"></ul>
+                </div>
+
+            </div>
+
+            <button type="submit" class="search-submit">Find the Connection</button>
+
+        </form>
+
+        <!-- ── Stats ────────────────────────────────────────────────────── -->
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat__value">36K</div>
+                <div class="stat__label">Movies</div>
+            </div>
+            <div class="stat">
+                <div class="stat__value">156K</div>
+                <div class="stat__label">People</div>
+            </div>
+            <div class="stat">
+                <div class="stat__value">455K</div>
+                <div class="stat__label">Connections</div>
+            </div>
+            <div class="stat">
+                <div class="stat__value">&lt; 6</div>
+                <div class="stat__label">Avg. Degrees</div>
+            </div>
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
+<script>
+    initAutocomplete('input-a', 'autocomplete-a');
+    initAutocomplete('input-b', 'autocomplete-b');
+</script>
+{% endblock %}

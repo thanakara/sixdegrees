@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ person.name }}{% endblock %}
+{% block meta_description %}{{ person.name }} — filmography, connections and more on SIXDEGREES.{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+    <div class="detail-header">
+        <p class="detail-header__label">Person</p>
+        <h1 class="detail-header__title">{{ person.name }}</h1>
+        <div class="detail-header__meta">
+            {% if person.birthYear %}
+            <span class="meta-pill">b. {{ person.birthYear }}</span>
+            {% endif %}
+            {% if person.profession %}
+            {% for role in person.profession.split(',') %}
+            <span class="meta-pill">{{ role.strip() | title }}</span>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div style="margin-bottom: 48px;">
+        <a href="{{ url_for('main.index') }}?a={{ person.name | urlencode }}" class="btn btn--outline">
+            ⟶ Find connections from {{ person.name }}
+        </a>
+    </div>
+
+    {% set acted = person.acted_in | selectattr('id') | list %}
+    {% if acted %}
+    <h2 class="section-title">Acted in <span
+            style="color:var(--text-muted);font-size:16px;font-family:var(--font-mono)">{{ acted | length }}</span></h2>
+    <div class="card-grid">
+        {% for movie in acted | sort(attribute='year', reverse=True) %}
+        <a href="{{ url_for('movie.detail', movie_id=movie.id) }}" class="card">
+            <div class="card__title">{{ movie.title }}</div>
+            <div class="card__meta">
+                <span>{{ movie.year }}</span>
+                {% if movie.rating %}
+                <span class="card__rating">★ {{ "%.1f"|format(movie.rating) }}</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% set directed = person.directed | selectattr('id') | list %}
+    {% if directed %}
+    <h2 class="section-title">Directed <span
+            style="color:var(--text-muted);font-size:16px;font-family:var(--font-mono)">{{ directed | length }}</span>
+    </h2>
+    <div class="card-grid">
+        {% for movie in directed | sort(attribute='year', reverse=True) %}
+        <a href="{{ url_for('movie.detail', movie_id=movie.id) }}" class="card">
+            <div class="card__title">{{ movie.title }}</div>
+            <div class="card__meta">
+                <span>{{ movie.year }}</span>
+                {% if movie.rating %}
+                <span class="card__rating">★ {{ "%.1f"|format(movie.rating) }}</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('main.index') }}" class="btn btn--outline">← Back to search</a>
+
+</div>
+{% endblock %}

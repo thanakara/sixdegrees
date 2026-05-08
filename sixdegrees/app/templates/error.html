@@ -1,6 +1,17 @@
 {% extends "base.html" %}
+
+{% block title %}{{ code }} — {{ name }}{% endblock %}
+
 {% block content %}
-<h1>{{ code }} — {{ name }}</h1>
-<p>{{ description }}</p>
-<a href="{{ url_for('main.index') }}">Go home</a>
+<div class="main-content">
+    <div class="error-page">
+
+        <div class="error-page__code">{{ code }}</div>
+        <div class="error-page__name">{{ name }}</div>
+        <p class="error-page__description">{{ description }}</p>
+
+        <a href="{{ url_for('main.index') }}" class="btn btn--outline">← Back to search</a>
+
+    </div>
+</div>
 {% endblock %}

@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}{{ name_a }} → {{ name_b }}{% endblock %}
+{% block meta_description %}{{ result.degrees }} degree{{ 's' if result.degrees != 1 }} of separation between {{ name_a
+}} and {{ name_b }}.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .graph-section {
+        margin: 48px 0;
+    }
+
+    .graph-section__title {
+        font-family: var(--font-display);
+        font-size: 24px;
+        letter-spacing: 0.06em;
+        color: var(--text);
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    #neovis-graph {
+        width: 100%;
+        height: 500px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .graph-loading {
+        width: 100%;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+    {% if result %}
+
+    <div class="path-header">
+        <p class="path-header__meta">Connection found</p>
+        <h1 class="path-header__title">
+            {{ name_a }} <em>&rarr;</em> {{ name_b }}
+        </h1>
+    </div>
+
+    <div class="degree-badge">
+        <span class="degree-badge__number">{{ result.degrees }}</span>
+        <span class="degree-badge__label">
+            degree{{ 's' if result.degrees != 1 }} of separation
+        </span>
+    </div>
+
+    <div class="chain" role="list">
+        {% for node in result.chain %}
+        {% if node.type == 'person' %}
+        <a href="{{ url_for('person.detail', person_id=node.id) }}" class="chain-person" role="listitem"
+            style="animation-delay: {{ loop.index0 * 0.08 }}s" title="{{ node.name }}">
+            <div class="chain-person__name">{{ node.name }}</div>
+            {% if node.birthYear %}
+            <div class="chain-person__year">b. {{ node.birthYear }}</div>
+            {% endif %}
+        </a>
+        {% elif node.type == 'movie' %}
+        <a href="{{ url_for('movie.detail', movie_id=node.id) }}" class="chain-movie" role="listitem"
+            style="animation-delay: {{ loop.index0 * 0.08 }}s" title="{{ node.title }}">
+            <div class="chain-movie__title">{{ node.title }}</div>
+            <div class="chain-movie__meta">
+                <span class="chain-movie__year">{{ node.year }}</span>
+                {% if node.rating %}
+                <span class="chain-movie__rating">★ {{ "%.1f"|format(node.rating) }}</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endif %}
+        {% if not loop.last %}
+        <div class="chain__connector" aria-hidden="true"></div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Neovis graph -->
+    <div class="graph-section">
+        <h2 class="graph-section__title">Connection graph</h2>
+        <div class="graph-loading" id="graph-loading">Rendering graph...</div>
+        <div id="neovis-graph" style="display:none;"></div>
+    </div>
+
+    <a href="{{ url_for('main.index') }}" class="btn btn--outline">← Try another search</a>
+
+    {% elif error %}
+
+    <div class="path-header">
+        <p class="path-header__meta">No connection found</p>
+        <h1 class="path-header__title">
+            {{ name_a }} <em>&rarr;</em> {{ name_b }}
+        </h1>
+    </div>
+    <div class="no-result">
+        <div class="no-result__icon">∅</div>
+        <p class="no-result__message">{{ error }}</p>
+        <a href="{{ url_for('main.index') }}" class="btn btn--outline">← Try another search</a>
+    </div>
+
+    {% else %}
+    <meta http-equiv="refresh" content="0;url={{ url_for('main.index') }}" />
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if result %}
+<script src="https://unpkg.com/neovis.js@2.0.2/dist/neovis.js"></script>
+<script>
+    const NEO4J_URI = {{ neo4j_uri | tojson }};
+    const NEO4J_USER = {{ neo4j_user | tojson }};
+    const NEO4J_PASSWORD = {{ neo4j_password | tojson }};
+    const NAME_A = {{ name_a | tojson }};
+    const NAME_B = {{ name_b | tojson }};
+
+    const config = {
+        containerId: "neovis-graph",
+        neo4j: {
+            serverUrl: NEO4J_URI,
+            serverUser: NEO4J_USER,
+            serverPassword: NEO4J_PASSWORD,
+        },
+        visConfig: {
+            nodes: {
+                font: {
+                    size: 14,
+                    face: "DM Sans",
+                    strokeWidth: 0,
+                    strokeColor: "transparent",
+                },
+            },
+            edges: {
+                color: { color: "#555", highlight: "#f5c518" },
+                font: {
+                    color: "#888",
+                    face: "DM Mono",
+                    size: 10,
+                    align: "middle",
+                    strokeWidth: 0,
+                    strokeColor: "transparent",
+                },
+                width: 1.5,
+                arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+            },
+            physics: {
+                enabled: true,
+                solver: "forceAtlas2Based",
+                forceAtlas2Based: {
+                    gravitationalConstant: -40,
+                    springLength: 140,
+                    springConstant: 0.08,
+                },
+                stabilization: { iterations: 150 },
+            },
+            interaction: { hover: true },
+            autoResize: true,
+        },
+        labels: {
+            Person: { label: "name" },
+            Movie: { label: "title" },
+        },
+        relationships: {
+            ACTED_IN: { label: "ACTED_IN" },
+            DIRECTED: { label: "DIRECTED" },
+        },
+        initialCypher: `
+    MATCH (a:Person {name: "${NAME_A}"}),
+          (b:Person {name: "${NAME_B}"})
+    MATCH path = shortestPath((a)-[:ACTED_IN|DIRECTED*..10]-(b))
+    RETURN path
+  `,
+    };
+
+    const viz = new NeoVis.default(config);
+
+    viz.registerOnEvent(NeoVis.NeoVisEvents.CompletionEvent, () => {
+        // Post-process nodes directly via vis-network dataset
+        const network = viz.network;
+        const nodes = viz.nodes;
+
+        const updates = [];
+        nodes.getIds().forEach(id => {
+            const node = nodes.get(id);
+            // Neovis stores the Neo4j labels on node.raw.labels
+            const labels = node.raw && node.raw.labels ? node.raw.labels : [];
+
+            if (labels.includes("Person")) {
+                updates.push({
+                    id,
+                    shape: "dot",
+                    size: 24,
+                    color: {
+                        background: "#1a1a2e",
+                        border: "#a0a8d4",
+                        highlight: { background: "#20203e", border: "#f5c518" },
+                    },
+                    font: { color: "#a0a8d4", size: 14, face: "DM Sans", strokeWidth: 0 },
+                });
+            } else if (labels.includes("Movie")) {
+                updates.push({
+                    id,
+                    shape: "box",
+                    size: 18,
+                    color: {
+                        background: "#2a1a00",
+                        border: "#f5c518",
+                        highlight: { background: "#3d2800", border: "#fff" },
+                    },
+                    font: { color: "#f5c518", size: 14, face: "DM Sans", strokeWidth: 0 },
+                });
+            }
+        });
+
+        nodes.update(updates);
+        // Post-process edges
+        const edges = viz.edges;
+        const edgeUpdates = [];
+
+        edges.getIds().forEach(id => {
+            const edge = edges.get(id);
+            const type = edge.raw && edge.raw.type ? edge.raw.type : "";
+
+            if (type === "ACTED_IN") {
+                edgeUpdates.push({
+                    id,
+                    label: "ACTED IN",
+                    font: {
+                        color: "#666",
+                        size: 10,
+                        face: "DM Mono",
+                        strokeWidth: 0,
+                        strokeColor: "transparent",
+                        align: "middle",
+                    },
+                    color: { color: "#444", highlight: "#f5c518" },
+                    width: 1.5,
+                });
+            } else if (type === "DIRECTED") {
+                edgeUpdates.push({
+                    id,
+                    label: "DIRECTED",
+                    font: {
+                        color: "#888",
+                        size: 10,
+                        face: "DM Mono",
+                        strokeWidth: 0,
+                        strokeColor: "transparent",
+                        align: "middle",
+                    },
+                    color: { color: "#666", highlight: "#f5c518" },
+                    width: 2,
+                    dashes: true,   // visually distinguish directed from acted_in
+                });
+            }
+        });
+
+        edges.update(edgeUpdates);
+
+        document.getElementById("graph-loading").style.display = "none";
+        document.getElementById("neovis-graph").style.display = "block";
+    });
+
+    viz.render();
+</script>
+{% endif %}
+{% endblock %}
