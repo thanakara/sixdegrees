@@ -23,7 +23,7 @@ def load(label: str, cypher: str, df: pd.DataFrame) -> None:
         done = min(i + batch_size, total)
         log.debug(f"  {label}: {done:,} / {total:,}")
 
-    log.info(f"  {label} done ✓")
+    log.info(f"  {label} ✓")
 
 
 def read(filename: str) -> pd.DataFrame:
