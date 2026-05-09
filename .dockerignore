@@ -4,5 +4,15 @@
 __pycache__
 *.pyc
 *.pyo
+
+
+.dvc/
+.ipynb_checkpoints/
+.pdm-build/
+.ruff_cache/
+assets/
+
+data/raw
+data/interim
+
 docker/
-data/

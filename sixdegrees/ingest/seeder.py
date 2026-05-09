@@ -44,13 +44,20 @@ def verify() -> None:
     RETURN type(r) AS label, count(*) AS total
     ORDER BY total DESC
     """
-    log.info("Verification:")
+    log.info("=== Verification ===")
     with get_session() as session:
         for row in session.run(cypher):
             log.info(f"  {row['label']:<20} {row['total']:>10,}")
 
 
 def main() -> None:
+    # check: idempotent
+    with get_session() as session:
+        count = session.run("MATCH (m:Movie) RETURN count(m) AS n").single()["n"]
+        if count > 0:
+            log.info("Database already seeded — skipping.")
+            return
+
     load_movies()
     load_people()
     load_genres()

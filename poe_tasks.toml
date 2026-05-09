@@ -24,23 +24,20 @@ sequence = [
 default_item_type = "cmd"
 executor = { type = "uv", with = ["dvc[gdrive]"], isolated = true }
 
-[tasks.compose_up]
-help = "Start Neo4j and run migrations"
+[tasks._compose_up]
 cwd = "docker"
 cmd = "docker compose --env-file=../.env up -d --build"
 
-[tasks.compose_down]
-help = "Stop and remove volumes"
+[tasks.start]
+help = "Pull data from DVC remote and start all Docker services"
+sequence = [
+    { cmd = "dvc pull", executor = { type = "uv", with = [
+        "dvc[gdrive]",
+    ], isolated = true } },
+    "_compose_up",
+]
+
+[tasks.stop]
+help = "Stop all services and remove volumes"
 cwd = "docker"
 cmd = "docker compose --env-file=../.env down -v"
-
-[tasks.seed]
-help = "Seed the Neo4j Database"
-cmd = "python sixdegrees/ingest/seeder.py"
-executor = { type = "uv" }
-
-[tasks.wsgi]
-help = "Start the Flask application"
-envfile = ".env"
-cmd = "python ${FLASK_APP}"
-executor = { type = "uv" }

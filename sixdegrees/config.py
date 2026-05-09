@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     )
 
     neo4j_uri: str = "bolt://localhost:7687"
+    neo4j_bolt_browser_uri: str = "bolt://127.0.0.1:7687"
     neo4j_user: str = "neo4j"
     neo4j_password: SecretStr
 
