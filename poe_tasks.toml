@@ -12,6 +12,18 @@ help = "Check formatting with diff (pass directory/file as arg)"
 cmd = "ruff format ${path} --check --diff"
 args = [{ name = "path", default = ".", positional = true, multiple = true }]
 
+[tasks.dvc_remote]
+help = "Configure DVC Google Drive remote with OAuth credentials"
+envfile = ".env"
+env = { "STORAGE" = "sixdegrees-store" }
+sequence = [
+    "dvc remote add --local -d ${STORAGE} gdrive://${FOLDER_ID}",
+    "dvc remote modify --local ${STORAGE} gdrive_use_service_account true",
+    "dvc remote modify --local ${STORAGE} gdrive_service_account_json_file_path ${JSONFILE_PATH}",
+]
+default_item_type = "cmd"
+executor = { type = "uv", with = ["dvc[gdrive]"], isolated = true }
+
 [tasks.compose_up]
 help = "Start Neo4j and run migrations"
 cwd = "docker"

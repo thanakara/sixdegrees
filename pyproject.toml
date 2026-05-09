@@ -18,4 +18,9 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["ipykernel>=7.2.0", "poethepoet>=0.45.0", "ruff>=0.15.12"]
+dev = [
+    "dvc[gdrive]>=3.67.1",
+    "ipykernel>=7.2.0",
+    "poethepoet>=0.45.0",
+    "ruff>=0.15.12",
+]
