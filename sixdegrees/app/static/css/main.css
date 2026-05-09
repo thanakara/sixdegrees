@@ -765,3 +765,14 @@ img {
         display: none;
     }
 }
+
+
+/* Genre-tag hover */
+a.genre-tag {
+    transition: border-color var(--transition), color var(--transition);
+}
+
+a.genre-tag:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}

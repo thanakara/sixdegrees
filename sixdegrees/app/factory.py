@@ -4,6 +4,7 @@ from werkzeug.exceptions import HTTPException
 from sixdegrees.config import settings
 from sixdegrees.app.extensions import close_driver
 from sixdegrees.app.blueprints.main import bp as main_bp
+from sixdegrees.app.blueprints.genre import bp as genre_bp
 from sixdegrees.app.blueprints.movie import bp as movie_bp
 from sixdegrees.app.blueprints.person import bp as person_bp
 
@@ -29,6 +30,7 @@ def _register_blueprints(app: Flask) -> None:
     app.register_blueprint(main_bp)
     app.register_blueprint(movie_bp, url_prefix="/movie")
     app.register_blueprint(person_bp, url_prefix="/person")
+    app.register_blueprint(genre_bp, url_prefix="/genre")
 
 
 def _register_error_handlers(app: Flask) -> None:

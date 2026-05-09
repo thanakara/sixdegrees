@@ -1,11 +1,64 @@
 {% extends "base.html" %}
 
 {% block title %}{{ person.name }}{% endblock %}
-{% block meta_description %}{{ person.name }} — filmography, connections and more on SIXDEGREES.{% endblock %}
+{% block meta_description %}{{ person.name }} — filmography and connections on SIXDEGREES.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .graph-section {
+        margin: 0 0 56px;
+    }
+
+    .graph-section__title {
+        font-family: var(--font-display);
+        font-size: 24px;
+        letter-spacing: 0.06em;
+        color: var(--text);
+        margin-bottom: 8px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .graph-section__hint {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+    }
+
+    #neovis-graph {
+        width: 100%;
+        height: 520px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .graph-loading {
+        width: 100%;
+        height: 520px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="main-content">
 
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
     <div class="detail-header">
         <p class="detail-header__label">Person</p>
         <h1 class="detail-header__title">{{ person.name }}</h1>
@@ -21,16 +74,32 @@
         </div>
     </div>
 
+    <!-- ── Find connections CTA ───────────────────────────────────────────── -->
     <div style="margin-bottom: 48px;">
         <a href="{{ url_for('main.index') }}?a={{ person.name | urlencode }}" class="btn btn--outline">
             ⟶ Find connections from {{ person.name }}
         </a>
     </div>
 
+    <!-- ── Ego graph ──────────────────────────────────────────────────────── -->
+    <div class="graph-section">
+        <h2 class="graph-section__title">Network</h2>
+        <p class="graph-section__hint">Click a movie to expand its cast</p>
+        <div id="neovis-graph" style="display:none;" data-uri="{{ neo4j_uri }}" data-user="{{ neo4j_user }}"
+            data-password="{{ neo4j_password }}" data-person-id="{{ person.id }}"></div>
+        <div class="graph-loading" id="graph-loading">Rendering network...</div>
+        <div id="neovis-graph" style="display:none;"></div>
+    </div>
+
+    <!-- ── Acted in ───────────────────────────────────────────────────────── -->
     {% set acted = person.acted_in | selectattr('id') | list %}
     {% if acted %}
-    <h2 class="section-title">Acted in <span
-            style="color:var(--text-muted);font-size:16px;font-family:var(--font-mono)">{{ acted | length }}</span></h2>
+    <h2 class="section-title">
+        Acted in
+        <span style="color:var(--text-muted);font-size:16px;font-family:var(--font-mono)">
+            {{ acted | length }}
+        </span>
+    </h2>
     <div class="card-grid">
         {% for movie in acted | sort(attribute='year', reverse=True) %}
         <a href="{{ url_for('movie.detail', movie_id=movie.id) }}" class="card">
@@ -46,10 +115,14 @@
     </div>
     {% endif %}
 
+    <!-- ── Directed ───────────────────────────────────────────────────────── -->
     {% set directed = person.directed | selectattr('id') | list %}
     {% if directed %}
-    <h2 class="section-title">Directed <span
-            style="color:var(--text-muted);font-size:16px;font-family:var(--font-mono)">{{ directed | length }}</span>
+    <h2 class="section-title">
+        Directed
+        <span style="color:var(--text-muted);font-size:16px;font-family:var(--font-mono)">
+            {{ directed | length }}
+        </span>
     </h2>
     <div class="card-grid">
         {% for movie in directed | sort(attribute='year', reverse=True) %}
@@ -69,4 +142,9 @@
     <a href="{{ url_for('main.index') }}" class="btn btn--outline">← Back to search</a>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/neovis.js@2.0.2/dist/neovis.js"></script>
+<script src="{{ url_for('static', filename='js/graph-person.js') }}"></script>
 {% endblock %}

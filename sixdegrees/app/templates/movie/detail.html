@@ -29,7 +29,7 @@
     {% if movie.genres %}
     <div class="genre-list">
         {% for genre in movie.genres | sort %}
-        <span class="genre-tag">{{ genre }}</span>
+        <a href="{{ url_for('genre.detail', name=genre) }}" class="genre-tag">{{ genre }}</a>
         {% endfor %}
     </div>
     {% endif %}

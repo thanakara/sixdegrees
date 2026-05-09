@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}{{ genre.genre }}{% endblock %}
+{% block meta_description %}Top {{ genre.genre }} movies on SIXDEGREES.{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+    <div class="detail-header">
+        <p class="detail-header__label">Genre</p>
+        <h1 class="detail-header__title">{{ genre.genre }}</h1>
+        <div class="detail-header__meta">
+            <span class="meta-pill">{{ genre.movies | length }} movies</span>
+        </div>
+    </div>
+
+    <div class="card-grid">
+        {% for movie in genre.movies %}
+        <a href="{{ url_for('movie.detail', movie_id=movie.id) }}" class="card">
+            <div class="card__title">{{ movie.title }}</div>
+            <div class="card__meta">
+                <span>{{ movie.year }}</span>
+                {% if movie.rating %}
+                <span class="card__rating">★ {{ "%.1f"|format(movie.rating) }}</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <a href="{{ url_for('main.index') }}" class="btn btn--outline">← Back to search</a>
+
+</div>
+{% endblock %}
