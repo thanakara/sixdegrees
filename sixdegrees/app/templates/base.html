@@ -5,9 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description"
-        content="{% block meta_description %}Explore the hidden connections between every actor in cinema.{% endblock %}" />
+        content="{% block meta_description %}Explore the hidden connections between every actor in cinema.{% endblock meta_description %}" />
 
-    <title>{% block title %}SIXDEGREES{% endblock %} — Six Degrees of Cinema</title>
+    <title>{% block title %}SIXDEGREES{% endblock title %} — Six Degrees of Cinema</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,7 +19,7 @@
     <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
 
-    {% block extra_css %}{% endblock %}
+    {% block extra_css %}{% endblock extra_css %}
 </head>
 
 <body>
@@ -39,7 +39,7 @@
 
     <!-- ── Main ───────────────────────────────────────────────────────────── -->
     <main>
-        {% block content %}{% endblock %}
+        {% block content %}{% endblock content %}
     </main>
 
     <!-- ── Footer ─────────────────────────────────────────────────────────── -->
@@ -52,7 +52,7 @@
     </footer>
 
     <!-- ── Scripts ────────────────────────────────────────────────────────── -->
-    {% block extra_js %}{% endblock %}
+    {% block extra_js %}{% endblock extra_js %}
 
 </body>
 

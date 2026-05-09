@@ -1,7 +1,9 @@
 /**
- * initAutocomplete(inputId, listId)
  * Wires up a search input to the /search?q= endpoint.
  * Keyboard navigable, closes on outside click.
+ * @param {string} inputId
+ * @param {string} listId
+ * @returns {void}
  */
 function initAutocomplete(inputId, listId) {
     const input = document.getElementById(inputId);

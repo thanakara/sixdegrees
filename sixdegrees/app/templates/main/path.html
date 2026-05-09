@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}{{ name_a }} → {{ name_b }}{% endblock %}
+{% block title %}{{ name_a }} → {{ name_b }}{% endblock title %}
 {% block meta_description %}{{ result.degrees }} degree{{ 's' if result.degrees != 1 }} of separation between {{ name_a
-}} and {{ name_b }}.{% endblock %}
+}} and {{ name_b }}.{% endblock meta_description %}
 
 {% block extra_css %}
 <style>
@@ -45,7 +45,7 @@
         text-transform: uppercase;
     }
 </style>
-{% endblock %}
+{% endblock extra_css %}
 
 {% block content %}
 <div class="main-content">
@@ -123,11 +123,11 @@
     {% endif %}
 
 </div>
-{% endblock %}
+{% endblock content %}
 
 {% block extra_js %}
 {% if result %}
 <script src="https://unpkg.com/neovis.js@2.0.2/dist/neovis.js"></script>
 <script src="{{ url_for('static', filename='js/graph-path.js') }}"></script>
 {% endif %}
-{% endblock %}
+{% endblock extra_js %}

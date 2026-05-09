@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}SIXDEGREES{% endblock %}
+{% block title %}SIXDEGREES{% endblock title %}
 
 {% block content %}
 <div class="main-content">
@@ -15,7 +15,7 @@
         </h1> -->
 
         <p class="hero__subtitle">
-            Every actor in cinema is connected through shared films.
+            Every actor/director in cinema is connected through shared films.
             Find the shortest path between any two people.
         </p>
 
@@ -69,7 +69,7 @@
     </section>
 
 </div>
-{% endblock %}
+{% endblock content %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
@@ -77,4 +77,4 @@
     initAutocomplete('input-a', 'autocomplete-a');
     initAutocomplete('input-b', 'autocomplete-b');
 </script>
-{% endblock %}
+{% endblock extra_js %}

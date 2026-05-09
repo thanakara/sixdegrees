@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}{{ genre.genre }}{% endblock %}
-{% block meta_description %}Top {{ genre.genre }} movies on SIXDEGREES.{% endblock %}
+{% block title %}{{ genre.genre }}{% endblock title %}
+{% block meta_description %}Top {{ genre.genre }} movies on SIXDEGREES.{% endblock meta_description%}
 
 {% block content %}
 <div class="main-content">
@@ -31,4 +31,4 @@
     <a href="{{ url_for('main.index') }}" class="btn btn--outline">← Back to search</a>
 
 </div>
-{% endblock %}
+{% endblock content %}
