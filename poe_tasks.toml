@@ -41,3 +41,34 @@ sequence = [
 help = "Stop all services and remove volumes"
 cwd = "docker"
 cmd = "docker compose --env-file=../.env down -v"
+
+# Aura
+[tasks._build_migrations]
+cmd = "docker build -q -f docker/Dockerfile.migrations docker/ -t sixdegrees-migrations"
+
+[tasks.migrate_aura]
+help = "Run migrations against Aura"
+envfile = ".env"
+sequence = [
+    "_build_migrations",
+    { cmd = "docker run --rm sixdegrees-migrations --address ${NEO4J_URI} --username ${NEO4J_USER} --password ${NEO4J_PASSWORD} --location file:///migrations migrate" },
+]
+
+[tasks.seed]
+help = "Seed the Neo4j database"
+envfile = ".env"
+cmd = "python -m sixdegrees.ingest.seeder"
+executor = { type = "uv" }
+
+[tasks.release_start]
+help = "Start Flask only, connecting to Aura"
+envfile = ".env"
+cwd = "docker"
+cmd = "docker compose -f docker-compose.release.yaml --env-file ../.env up -d --build"
+
+
+[tasks.release_stop]
+help = "Stop release services"
+envfile = ".env"
+cwd = "docker"
+cmd = "docker compose -f docker-compose.release.yaml --env-file ../.env down"
