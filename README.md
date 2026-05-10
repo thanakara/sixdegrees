@@ -79,4 +79,5 @@ NEO4J_BOLT_BROWSER_URI
 ## LICENCE
 
 IMDB data — [Non-Commercial License](https://developer.imdb.com/non-commercial-datasets/).
+
 MovieLens data — [GroupLens License](https://files.grouplens.org/datasets/movielens/ml-latest-README.html).
