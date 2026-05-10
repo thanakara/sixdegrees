@@ -1,47 +1,30 @@
 /**
- * Renders the ego-network for a person page with click-to-expand.
- * Config is read from data-* attributes on #neovis-graph.
+ * Renders ego network for a person page with click-to-expand.
+ * Fetches data from /api/person/<id>/graph and /api/movie/<id>/expand.
  */
+document.addEventListener("DOMContentLoaded", () => {
+    const _el = document.getElementById("neovis-graph");
+    if (!_el) return;
 
-const _el = document.getElementById("neovis-graph");
-const NEO4J_URI = _el.dataset.uri;
-const NEO4J_USER = _el.dataset.user;
-const NEO4J_PASSWORD = _el.dataset.password;
-const PERSON_ID = _el.dataset.personId;
+    const PERSON_ID = _el.dataset.personId;
 
-const expanded = new Set();
+    const PERSON_COLOR = { background: "#1a1a2e", border: "#a0a8d4", highlight: { background: "#20203e", border: "#f5c518" } };
+    const MOVIE_COLOR = { background: "#2a1a00", border: "#f5c518", highlight: { background: "#3d2800", border: "#ffffff" } };
+    const EXPANDED_COLOR = { background: "#1a2a00", border: "#6fcf4a", highlight: { background: "#253d00", border: "#ffffff" } };
 
-const config = {
-    containerId: "neovis-graph",
-    neo4j: {
-        serverUrl: NEO4J_URI,
-        serverUser: NEO4J_USER,
-        serverPassword: NEO4J_PASSWORD,
-    },
-    visConfig: {
+    const options = {
         nodes: {
-            font: {
-                size: 14,
-                face: "DM Sans",
-                strokeWidth: 0,
-                strokeColor: "transparent",
-            },
+            font: { color: "#efefef", face: "DM Sans", size: 14, strokeWidth: 0 },
+            borderWidth: 1.5,
         },
         edges: {
             color: { color: "#555", highlight: "#f5c518" },
-            font: {
-                color: "#888",
-                face: "DM Mono",
-                size: 10,
-                align: "middle",
-                strokeWidth: 0,
-                strokeColor: "transparent",
-            },
+            font: { color: "#888", face: "DM Mono", size: 10, align: "middle", strokeWidth: 0 },
             width: 1.5,
             arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+            smooth: { type: "curvedCW", roundness: 0.1 },
         },
         physics: {
-            enabled: true,
             solver: "forceAtlas2Based",
             forceAtlas2Based: {
                 gravitationalConstant: -40,
@@ -50,117 +33,63 @@ const config = {
             },
             stabilization: { iterations: 150 },
         },
-        interaction: { hover: true, clickToUse: false },
-        autoResize: true,
-    },
-    labels: {
-        Person: { label: "name" },
-        Movie: { label: "title" },
-    },
-    relationships: {
-        ACTED_IN: { label: "ACTED_IN" },
-        DIRECTED: { label: "DIRECTED" },
-    },
-    initialCypher: `
-    MATCH (p:Person {person_id: "${PERSON_ID}"})-[r:ACTED_IN|DIRECTED]->(m:Movie)
-    RETURN p, r, m
-  `,
-};
+        interaction: { hover: true },
+    };
 
-function styleNodes(viz) {
-    const updates = [];
-    viz.nodes.getIds().forEach(id => {
-        const node = viz.nodes.get(id);
-        const labels = node.raw && node.raw.labels ? node.raw.labels : [];
-
-        if (labels.includes("Person")) {
-            updates.push({
-                id,
-                shape: "dot",
-                size: 24,
-                color: {
-                    background: "#1a1a2e",
-                    border: "#a0a8d4",
-                    highlight: { background: "#20203e", border: "#f5c518" },
-                },
-                font: { color: "#a0a8d4", size: 14, face: "DM Sans", strokeWidth: 0 },
-            });
-        } else if (labels.includes("Movie")) {
-            const movieId = node.raw.properties.movie_id;
-            const isExpanded = expanded.has(movieId);
-            updates.push({
-                id,
-                shape: "box",
-                size: 18,
-                color: {
-                    background: isExpanded ? "#1a2a00" : "#2a1a00",
-                    border: isExpanded ? "#6fcf4a" : "#f5c518",
-                    highlight: { background: "#3d2800", border: "#fff" },
-                },
-                font: {
-                    color: isExpanded ? "#6fcf4a" : "#f5c518",
-                    size: 14,
-                    face: "DM Sans",
-                    strokeWidth: 0,
-                },
-            });
+    function styleNode(node) {
+        if (node.group === "person") {
+            return { ...node, shape: "dot", size: 24, color: PERSON_COLOR, font: { color: "#a0a8d4", face: "DM Sans", size: 14, strokeWidth: 0 } };
         }
-    });
-    viz.nodes.update(updates);
-}
+        return { ...node, shape: "box", size: 18, color: MOVIE_COLOR, font: { color: "#f5c518", face: "DM Sans", size: 14, strokeWidth: 0 } };
+    }
 
-function styleEdges(viz) {
-    const updates = [];
-    viz.edges.getIds().forEach(id => {
-        const edge = viz.edges.get(id);
-        const type = edge.raw && edge.raw.type ? edge.raw.type : "";
-        updates.push({
-            id,
-            label: type === "ACTED_IN" ? "ACTED IN" : type,
-            font: { color: "#666", size: 10, face: "DM Mono", strokeWidth: 0, strokeColor: "transparent", align: "middle" },
-            color: { color: "#444", highlight: "#f5c518" },
-            dashes: type === "DIRECTED",
-            width: type === "DIRECTED" ? 2 : 1.5,
+    async function renderPersonGraph() {
+        const res = await fetch(`/api/person/${PERSON_ID}/graph`);
+        const data = await res.json();
+
+        const nodesDS = new vis.DataSet(data.nodes.map(styleNode));
+        const edgesDS = new vis.DataSet(data.edges);
+        const expanded = new Set();
+
+        const container = document.getElementById("neovis-graph");
+        const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, options);
+
+        network.once("stabilized", () => {
+            document.getElementById("graph-loading").style.display = "none";
+            container.style.display = "block";
         });
-    });
-    viz.edges.update(updates);
-}
 
-const viz = new NeoVis.default(config);
+        // Click to expand movie nodes
+        network.on("click", async params => {
+            if (!params.nodes.length) return;
 
-viz.registerOnEvent(NeoVis.NeoVisEvents.CompletionEvent, () => {
-    styleNodes(viz);
-    styleEdges(viz);
-    document.getElementById("graph-loading").style.display = "none";
-    document.getElementById("neovis-graph").style.display = "block";
+            const nodeId = params.nodes[0];
+            const node = nodesDS.get(nodeId);
+            if (!node || node.group !== "movie") return;
+
+            const movieId = node.movie_id;
+            if (!movieId || expanded.has(movieId)) return;
+            expanded.add(movieId);
+
+            // Mark as expanded
+            nodesDS.update({ id: nodeId, color: EXPANDED_COLOR, font: { color: "#6fcf4a", face: "DM Sans", size: 14, strokeWidth: 0 } });
+
+            const res = await fetch(`/api/movie/${movieId}/expand`);
+            const data = await res.json();
+
+            // Add new nodes and edges — skip ones already in the graph
+            const existingIds = new Set(nodesDS.getIds());
+            const newNodes = data.nodes
+                .filter(n => !existingIds.has(n.id))
+                .map(styleNode);
+
+            const existingEdges = new Set(edgesDS.getIds());
+            const newEdges = data.edges.filter(e => !existingEdges.has(e.id));
+
+            nodesDS.add(newNodes);
+            edgesDS.add(newEdges);
+        });
+    }
+
+    renderPersonGraph();
 });
-
-// Register click handler once after first render
-let clickRegistered = false;
-viz.registerOnEvent(NeoVis.NeoVisEvents.CompletionEvent, () => {
-    if (clickRegistered) return;
-    clickRegistered = true;
-
-    viz.network.on("click", params => {
-        if (!params.nodes.length) return;
-
-        const nodeId = params.nodes[0];
-        const node = viz.nodes.get(nodeId);
-        if (!node) return;
-
-        const labels = node.raw && node.raw.labels ? node.raw.labels : [];
-        if (!labels.includes("Movie")) return;
-
-        const movieId = node.raw.properties.movie_id;
-        if (expanded.has(movieId)) return;
-
-        expanded.add(movieId);
-
-        viz.updateWithCypher(`
-      MATCH (m:Movie {movie_id: "${movieId}"})<-[r:ACTED_IN|DIRECTED]-(co:Person)
-      RETURN m, r, co
-    `);
-    });
-});
-
-viz.render();

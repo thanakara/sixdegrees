@@ -1,6 +1,5 @@
 from flask import jsonify, request, render_template
 
-from sixdegrees.config import settings
 from sixdegrees.app.blueprints.main import bp
 from sixdegrees.app.blueprints.main.queries import search_people, shortest_path
 
@@ -29,9 +28,6 @@ def path():
         name_b=name_b,
         result=result,
         error=error,
-        neo4j_uri=settings.neo4j_bolt_browser_uri,
-        neo4j_user=settings.neo4j_user,
-        neo4j_password=settings.neo4j_password.get_secret_value(),
     )
 
 

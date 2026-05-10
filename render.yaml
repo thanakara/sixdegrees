@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: sixdegrees
+    runtime: docker
+    dockerfilePath: ./docker/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: NEO4J_URI
+        sync: false
+      - key: NEO4J_USER
+        sync: false
+      - key: NEO4J_PASSWORD
+        sync: false
+      - key: NEO4J_DATABASE
+        sync: false
+      - key: NEO4J_BOLT_BROWSER_URI
+        sync: false
+      - key: FLASK_ENV
+        value: production
+      - key: DEBUG
+        value: "false"

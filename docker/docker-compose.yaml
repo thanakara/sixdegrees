@@ -55,8 +55,6 @@ services:
       NEO4J_BOLT_BROWSER_URI: bolt://127.0.0.1:7687 # client-side: browser
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: ${NEO4J_PASSWORD}
-      FLASK_ENV: production
-      DEBUG: "false"
     depends_on:
       seeder:
         condition: service_completed_successfully

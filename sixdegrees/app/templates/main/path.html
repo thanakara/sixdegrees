@@ -98,8 +98,7 @@
     <div class="graph-section">
         <h2 class="graph-section__title">Connection graph</h2>
         <div class="graph-loading" id="graph-loading">Rendering graph...</div>
-        <div id="neovis-graph" style="display:none;" data-uri="{{ neo4j_uri }}" data-user="{{ neo4j_user }}"
-            data-password="{{ neo4j_password }}" data-name-a="{{ name_a }}" data-name-b="{{ name_b }}"></div>
+        <div id="neovis-graph" style="display:none;" data-name-a="{{ name_a }}" data-name-b="{{ name_b }}"></div>
     </div>
 
     <a href="{{ url_for('main.index') }}" class="btn btn--outline">← Try another search</a>
@@ -127,7 +126,7 @@
 
 {% block extra_js %}
 {% if result %}
-<script src="https://unpkg.com/neovis.js@2.0.2/dist/neovis.js"></script>
+<script src="https://unpkg.com/vis-network@9.1.9/dist/vis-network.min.js"></script>
 <script src="{{ url_for('static', filename='js/graph-path.js') }}"></script>
 {% endif %}
 {% endblock extra_js %}

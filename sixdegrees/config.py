@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     neo4j_bolt_browser_uri: str = "bolt://127.0.0.1:7687"
     neo4j_user: str = "neo4j"
     neo4j_password: SecretStr
+    neo4j_database: str = "neo4j"
 
     flask_env: str = "development"
     debug: bool = True

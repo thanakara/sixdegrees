@@ -13,7 +13,7 @@ def get_driver():
     return GraphDatabase.driver(
         uri=settings.neo4j_uri,
         auth=settings.neo4j_auth,
-        max_connection_lifetime=200,
+        max_connection_lifetime=60,
         max_connection_pool_size=50,
         connection_acquisition_timeout=30,
         keep_alive=True,
@@ -24,12 +24,22 @@ def get_driver():
 def get_session():
     """Context-managed session - always closes even on exception raise"""
 
-    driver = get_driver()
-    session = driver.session(database="neo4j")
     try:
-        yield session
-    finally:
-        session.close()
+        driver = get_driver()
+        session = driver.session(database=settings.neo4j_database)
+        try:
+            yield session
+        finally:
+            session.close()
+    except Exception:
+        # clear stale driver and retry once with a fresh connection
+        get_driver.cache_clear()
+        driver = get_driver()
+        session = driver.session(database=settings.neo4j_database)
+        try:
+            yield session
+        finally:
+            session.close()
 
 
 def close_driver():
